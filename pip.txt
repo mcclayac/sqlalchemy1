@@ -1,0 +1,235 @@
+
+
+
+psycopg2
+
+
+pip install sqlalchemy
+pip install psycopg2
+
+
+from datetime import datetime
+from first import cookies
+from first import connection
+
+ins = cookies.insert().values(
+    cookie_name="chocolate chip",
+    cookie_recipe_url="http://some.aweso.me/cookie/recipe.html",
+    cookie_sku="CC01",
+    quantity="12",
+    unit_cost="0.50"
+)
+print(str(ins))
+INSERT INTO cookies (cookie_name, cookie_recipe_url, cookie_sku, quantity, unit_cost) VALUES (:cookie_name, :cookie_recipe_url, :cookie_sku, :quantity, :unit_cost)
+ins.compile().params
+{'unit_cost': '0.50', 'cookie_sku': 'CC01', 'cookie_recipe_url': 'http://some.aweso.me/cookie/recipe.html', 'quantity': '12', 'cookie_name': 'chocolate chip'}
+
+print(connection)
+
+result = connection.execute(ins)
+print(result)
+<sqlalchemy.engine.result.ResultProxy object at 0x1061332b0>
+
+print(result.inserted_primary_key)
+[1]
+
+from sqlalchemy import insert
+
+ins = insert(cookies).values(
+    cookie_name="chocolate chip",
+    cookie_recipe_url="http://some.aweso.me/cookie/recipe.html",
+    cookie_sku="CC01",
+    quantity="12",
+    unit_cost="0.50"
+)
+ins.compile().params
+result = connection.execute(ins)
+print(result.inserted_primary_key)
+
+
+ins = cookies.insert()
+result = connection.execute(
+    ins,
+    cookie_name='dark chocolate chip',
+    cookie_recipe_url='http://some.aweso.me/cookie/recipe_dark.html',
+    cookie_sku='CC02',
+    quantity='1',
+    unit_cost='0.75'
+)
+result.inserted_primary_key
+
+
+inventory_list = [
+    {
+        'cookie_name': 'peanut butter',
+        'cookie_recipe_url': 'http://some.aweso.me/cookie/peanut.html',
+        'cookie_sku': 'PB01',
+        'quantity': '24',
+        'unit_cost': '0.25'
+    },
+    {
+        'cookie_name': 'oatmeal raisin',
+        'cookie_recipe_url': 'http://some.okay.me/cookie/raisin.html',
+        'cookie_sku': 'EWW01',
+        'quantity': '100',
+        'unit_cost': '1.00'
+    }
+]
+result = connection.execute(ins, inventory_list)
+
+
+from sqlalchemy.sql import select
+s = select([cookies])
+rp = connection.execute(s)
+results = rp.fetchall()
+pp.pprint(results)
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+pp.pprint(results)
+
+
+s = cookies.select()
+rp = connection.execute(s)
+results = rp.fetchall()
+pp.pprint(results)
+[   (1, 'chocolate chip', 'http://some.aweso.me/cookie/recipe.html', 'CC01', 12, Decimal('0.50')),
+    (2, 'chocolate chip', 'http://some.aweso.me/cookie/recipe.html', 'CC01', 12, Decimal('0.50')),
+    (3, 'dark chocolate chip', 'http://some.aweso.me/cookie/recipe_dark.html', 'CC02', 1, Decimal('0.75')),
+    (4, 'peanut butter', 'http://some.aweso.me/cookie/peanut.html', 'PB01', 24, Decimal('0.25')),
+    (5, 'oatmeal raisin', 'http://some.okay.me/cookie/raisin.html', 'EWW01', 100, Decimal('1.00'))]
+
+
+first_row = results[0]
+pp.pprint(first_row)
+(1, 'chocolate chip', 'http://some.aweso.me/cookie/recipe.html', 'CC01', 12, Decimal('0.50'))
+
+
+columnIndex1  = first_row[1]
+pp.pprint(columnIndex1)
+'chocolate chip'
+
+
+s = select([cookies]).where(cookies.c.cookie_name == 'chocolate chip')
+rp = connection.execute(s)
+record = rp.first()
+print(record.items())
+[('cookie_id', 2), ('cookie_name', 'chocolate chip'), ('cookie_recipe_url', 'http://some.aweso.me/cookie/recipe.html'), ('cookie_sku', 'CC01'), ('quantity', 12), ('unit_cost', Decimal('0.50'))]
+pp.pprint(record.items())
+[   ('cookie_id', 2),
+    ('cookie_name', 'chocolate chip'),
+    ('cookie_recipe_url', 'http://some.aweso.me/cookie/recipe.html'),
+    ('cookie_sku', 'CC01'),
+    ('quantity', 12),
+    ('unit_cost', Decimal('0.50'))]
+
+
+
+s = select([cookies]).where(cookies.c.cookie_name.like('%chocolate%'))
+rp = connection.execute(s)
+for record in rp.fetchall():
+    print(record.cookie_name)
+
+
+first_row = results[0] 1
+first_row[1] 2
+first_row.cookie_name 3
+first_row[cookies.c.cookie_name] 4
+
+
+s = select([cookies.c.cookie_name, cookies.c.quantity])
+rp = connection.execute(s)
+print(rp.keys())
+['cookie_name', 'quantity']
+for record in rp:
+    print(record)
+
+
+s = select([...]).order_by(...)
+
+s = s.limit(2)
+
+
+from sqlalchemy.sql import func
+
+s = select([func.sum(cookies.c.quantity)])
+rp = connection.execute(s)
+print(rp.scalar())
+
+s = select([func.count(cookies.c.cookie_name).label('inventory_count')])
+rp = connection.execute(s)
+record = rp.first()
+print(record.keys())
+print(record.inventory_count)
+
+s = select([cookies]).where(cookies.c.cookie_name == 'chocolate chip')
+rp = connection.execute(s)
+
+
+s = select([cookies]).where(cookies.c.cookie_name.like('%chocolate%'))
+rp = connection.execute(s)
+for record in rp.fetchall():
+    print(record.cookie_name)
+
+
+s = select([cookies]).distinct())
+rp = connection.execute(s)
+for record in rp.fetchall():
+    print(record.cookie_name)
+
+
+s = select([cookies]).where(cookies.c.cookie_name.like('%chocolate%'))
+
+from sqlalchemy import distinct
+
+# count distinct "name" values
+session.query(func.count(distinct(User.name)))
+
+
+s = select([cookies]).distinct()
+rp = connection.execute(s)
+results = rp.fetchall()
+pp.pprint(results)
+
+
+
+s = select([cookies.c.cookie_name, cookies.c.quantity]).distinct()
+rp = connection.execute(s)
+results = rp.fetchall()
+pp.pprint(results)
+
+s = select([cookies.c.cookie_name]).distinct().order_by('cookie_name')
+rp = connection.execute(s)
+results = rp.fetchall()
+pp.pprint(results)
+
+
+s = select([cookies.c.cookie_name, 'SKU-' + cookies.c.cookie_sku])
+for row in connection.execute(s):
+    print(row)
+
+
+from sqlalchemy import cast
+from sqlalchemy import Numeric
+
+s = select([cookies.c.cookie_name,
+          cast((cookies.c.quantity * cookies.c.unit_cost),
+               Numeric(12,2)).label('inv_cost')])
+for row in connection.execute(s):
+    print('{} - {}'.format(row.cookie_name, row.inv_cost))
+
+
+from sqlalchemy import and_, or_, not_
+s = select([cookies]).where(
+    and_(
+        cookies.c.quantity > 23,
+        cookies.c.unit_cost < 0.40
+   )
+)
+for row in connection.execute(s):
+    print(row.cookie_name)
+
+
+
+
+
