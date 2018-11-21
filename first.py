@@ -7,16 +7,10 @@ __revision_date__ = '$'
 
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
-
 from sqlalchemy import Table, Column, Integer, Numeric, String, ForeignKey, Boolean
 from datetime import datetime
 from sqlalchemy import DateTime
-
 from sqlalchemy import ForeignKey
-
-
-
-
 
 
 metadata = MetaData()
